@@ -93,6 +93,8 @@ public class CliHistorical extends ServerRunnable
             binder.bind(ServerManager.class).in(LazySingleton.class);
             binder.bind(SegmentManager.class).in(LazySingleton.class);
             binder.bind(ZkCoordinator.class).in(ManageLifecycle.class);
+
+            //Historical 节点 QuerySegmentWalker 实现是  ServerManager
             binder.bind(QuerySegmentWalker.class).to(ServerManager.class).in(LazySingleton.class);
 
             binder.bind(NodeTypeConfig.class).toInstance(new NodeTypeConfig(ServerType.HISTORICAL));

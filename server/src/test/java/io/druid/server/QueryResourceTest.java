@@ -357,7 +357,7 @@ public class QueryResourceTest
                 Throwables.propagate(e);
               }
               return new Access(true);
-            } else {
+            } else {//allow the cancel 请求
               return new Access(true);
             }
           }
@@ -480,6 +480,7 @@ public class QueryResourceTest
               return new Access(true);
             } else {
               // Deny access to cancel the query
+              //拒绝cancel请求,cancel 为 Action.WRITE
               return new Access(false);
             }
           }
@@ -512,6 +513,7 @@ public class QueryResourceTest
     ObjectMapper mapper = new DefaultObjectMapper();
     Query query = mapper.readValue(queryString, Query.class);
 
+    //cancel请求 会被拒绝
     ListenableFuture future = MoreExecutors.listeningDecorator(
         Execs.singleThreaded("test_query_resource_%s")
     ).submit(

@@ -160,6 +160,7 @@ public class QueryResource implements QueryCountStatsProvider
       @Context final HttpServletRequest req // used to get request content-type, remote address and auth-related headers
   ) throws IOException
   {
+    //生成 QueryLifecycle
     final QueryLifecycle queryLifecycle = queryLifecycleFactory.factorize();
     Query<?> query = null;
 

@@ -67,6 +67,8 @@ import java.util.Iterator;
  * value files are identified as: StringUtils.format("%s_value_%d", columnName, fileNumber)
  * number of value files == numElements/numberOfElementsPerValueFile
  */
+
+//通用的索引
 public class GenericIndexed<T> implements Indexed<T>
 {
   static final byte VERSION_ONE = 0x1;
@@ -267,6 +269,9 @@ public class GenericIndexed<T> implements Indexed<T>
    *
    * @return index of value, or negative number equal to (-(insertion point) - 1).
    */
+
+
+  //根据value反查索引  allowReverseLookup 要为true,允许反查
   @Override
   public int indexOf(T value)
   {

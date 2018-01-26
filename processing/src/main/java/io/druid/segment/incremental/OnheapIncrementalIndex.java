@@ -43,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * 堆内增量索引
  */
 public class OnheapIncrementalIndex extends IncrementalIndex<Aggregator>
 {

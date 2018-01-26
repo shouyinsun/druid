@@ -171,6 +171,8 @@ public class QueryLifecycle
       queryId = UUID.randomUUID().toString();
     }
 
+    //QueryPlus 包含 Query<> 和 QueryMetrics
+    //设置queryId 跟 defaultQueryTimeout  maxScatterGatherBytes
     this.queryPlus = QueryPlus.wrap(
         (Query) DirectDruidClient.withDefaultTimeoutAndMaxScatterGatherBytes(
             baseQuery.withId(queryId),

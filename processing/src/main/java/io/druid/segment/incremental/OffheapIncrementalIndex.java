@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * 堆外增量索引
  */
 public class OffheapIncrementalIndex extends IncrementalIndex<BufferAggregator>
 {
