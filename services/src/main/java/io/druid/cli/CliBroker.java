@@ -63,6 +63,7 @@ import org.eclipse.jetty.server.Server;
 import java.util.List;
 
 /**
+ *
  */
 @Command(
     name = "broker",
@@ -95,6 +96,7 @@ public class CliBroker extends ServerRunnable
             binder.bindConstant().annotatedWith(Names.named("servicePort")).to(8082);
             binder.bindConstant().annotatedWith(Names.named("tlsServicePort")).to(8282);
 
+            //CachingClusteredClient Broker查询的核心类
             binder.bind(CachingClusteredClient.class).in(LazySingleton.class);
             binder.bind(BrokerServerView.class).in(LazySingleton.class);
             binder.bind(TimelineServerView.class).to(BrokerServerView.class).in(LazySingleton.class);

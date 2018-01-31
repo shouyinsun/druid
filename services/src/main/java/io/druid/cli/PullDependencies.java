@@ -55,7 +55,9 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
-
+/**
+ * 拉取依赖
+ */
 @Command(
     name = "pull-deps",
     description = "Pull down dependencies to the local repository specified by druid.extensions.localRepository, extensions directory specified by druid.extensions.extensionsDir and hadoop dependencies directory specified by druid.extensions.hadoopDependenciesDir"

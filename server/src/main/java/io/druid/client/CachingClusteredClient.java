@@ -203,7 +203,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
   }
 
   /**
-   * This class essentially incapsulates the major part of the logic of {@link CachingClusteredClient}. It's state and
+   * This class essentially encapsulates the major part of the logic of {@link CachingClusteredClient}. It's state and
    * methods couldn't belong to {@link CachingClusteredClient} itself, because they depend on the specific query object
    * being run, but {@link QuerySegmentWalker} API is designed so that implementations should be able to accept
    * arbitrary queries.
@@ -248,6 +248,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
       contextBuilder.put(QueryContexts.PRIORITY_KEY, priority);
 
       if (populateCache) {
+        //正在填充缓存,下游查询不再填充
         // prevent down-stream nodes from caching results as well if we are populating the cache
         contextBuilder.put(CacheConfig.POPULATE_CACHE, false);
         contextBuilder.put("bySegment", true);
@@ -266,6 +267,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
       if (uncoveredIntervalsLimit > 0) {
         computeUncoveredIntervals(timeline);
       }
+      //计算查询的segments对应的server (历史节点或者实时节点或者索引服务中的节点)
       final Set<ServerToSegment> segments = computeSegmentsToQuery(timeline);
       @Nullable final byte[] queryCacheKey = computeQueryCacheKey();
       if (query.getContext().get(QueryResource.HEADER_IF_NONE_MATCH) != null) {
@@ -275,8 +277,9 @@ public class CachingClusteredClient implements QuerySegmentWalker
           return Sequences.empty();
         }
       }
-        //判断是否有缓存
+      //是否有缓存
       final List<Pair<Interval, byte[]>> alreadyCachedResults = pruneSegmentsWithCachedResults(queryCacheKey, segments);
+      //segments通过server分组
       final SortedMap<DruidServer, List<SegmentDescriptor>> segmentsByServer = groupSegmentsByServer(segments);
       return new LazySequence<>(() -> {
         List<Sequence<T>> sequencesByInterval = new ArrayList<>(alreadyCachedResults.size() + segmentsByServer.size());
@@ -307,7 +310,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
         //一个 TimelineObjectHolder 对应一个segment
         //PartitionChunk代表一个分片  PartitionChunk 的object对象指向 ServerSelector
         //ServerSelector 保存了分区所在的 QueryableDruidServer
-        // QueryableDruidServer是历史节点或者实时节点(或者索引服务中的节点)
+        //QueryableDruidServer是历史节点或者实时节点(或者索引服务中的节点)
 
         for (TimelineObjectHolder<String, ServerSelector> holder : serversLookup) {
         final Set<PartitionChunk<ServerSelector>> filteredChunks = DimFilterUtils.filterShards(
@@ -406,6 +409,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
       }
     }
 
+    //删减去已经缓存的数据
     private List<Pair<Interval, byte[]>> pruneSegmentsWithCachedResults(
         final byte[] queryCacheKey,
         final Set<ServerToSegment> segments
@@ -436,6 +440,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
       return alreadyCachedResults;
     }
 
+    //计算每个segment的缓存key值
     private Map<ServerToSegment, Cache.NamedKey> computePerSegmentCacheKeys(
         Set<ServerToSegment> segments,
         byte[] queryCacheKey
@@ -454,6 +459,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
       return cacheKeys;
     }
 
+    //获取segment缓存key对应的value
     private Map<Cache.NamedKey, byte[]> computeCachedValues(Map<ServerToSegment, Cache.NamedKey> cacheKeys)
     {
       if (useCache) {
@@ -545,6 +551,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
       }
     }
 
+    //从server中获取sequence
     private void addSequencesFromServer(
         final List<Sequence<T>> listOfSequences,
         final SortedMap<DruidServer, List<SegmentDescriptor>> segmentsByServer
@@ -561,7 +568,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
         final MultipleSpecificSegmentSpec segmentsOfServerSpec = new MultipleSpecificSegmentSpec(segmentsOfServer);
 
         Sequence<T> serverResults;
-        if (isBySegment) {
+        if (isBySegment) {//BySegment需要反序列化
           serverResults = getBySegmentServerResults(serverRunner, segmentsOfServerSpec);
         } else if (!server.segmentReplicatable() || !populateCache) {
           serverResults = getSimpleServerResults(serverRunner, segmentsOfServerSpec);
@@ -573,6 +580,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
     }
 
     @SuppressWarnings("unchecked")
+    //从server中 BySegment方式获取Sequence
     private Sequence<T> getBySegmentServerResults(
         final QueryRunner serverRunner,
         final MultipleSpecificSegmentSpec segmentsOfServerSpec
@@ -590,6 +598,7 @@ public class CachingClusteredClient implements QuerySegmentWalker
     }
 
     @SuppressWarnings("unchecked")
+    //从server中获取Sequence
     private Sequence<T> getSimpleServerResults(
         final QueryRunner serverRunner,
         final MultipleSpecificSegmentSpec segmentsOfServerSpec
@@ -598,6 +607,8 @@ public class CachingClusteredClient implements QuerySegmentWalker
       return serverRunner.run(queryPlus.withQuerySegmentSpec(segmentsOfServerSpec), responseContext);
     }
 
+
+    //获取并缓存
     private Sequence<T> getAndCacheServerResults(
         final QueryRunner serverRunner,
         final MultipleSpecificSegmentSpec segmentsOfServerSpec

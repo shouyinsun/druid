@@ -187,11 +187,13 @@ public class QueryResource implements QueryCountStatsProvider
       }
 
       final QueryLifecycle.QueryResponse queryResponse = queryLifecycle.execute();
-      //返回Sequence
+      //返回Sequence1
       final Sequence<?> results = queryResponse.getResults();
       final Map<String, Object> responseContext = queryResponse.getResponseContext();
+      //获取 If-None-Match 属性
       final String prevEtag = getPreviousEtag(req);
 
+      // ETag/If-None-Match的使用  请求的 If-None-Match 与 Response 中的 ETag 相同,资源没有修改,直接返回304,客户端使用自己的缓存,减少网络传输
       if (prevEtag != null && prevEtag.equals(responseContext.get(HEADER_ETAG))) {
         return Response.notModified().build();
       }
